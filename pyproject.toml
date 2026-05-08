@@ -1,0 +1,30 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mdscalpel"
+version = "0.1.0"
+description = "Token-efficient, section-aware Markdown file access for AI workflows"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+keywords = ["markdown", "ai", "llm", "token-efficiency", "content"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Text Processing :: Markup",
+]
+
+[project.scripts]
+mdscalpel = "mdscalpel.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/wrashi/mdscalpel"
+Repository = "https://github.com/wrashi/mdscalpel"
+Issues = "https://github.com/wrashi/mdscalpel/issues"
