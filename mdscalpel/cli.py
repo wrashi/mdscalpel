@@ -2,7 +2,6 @@
 
 import argparse
 import sys
-from pathlib import Path
 from .core import MdScalpel
 
 
@@ -94,7 +93,17 @@ def main():
     p.set_defaults(func=cmd_set_frontmatter)
 
     args = parser.parse_args()
-    args.func(args)
+    try:
+        args.func(args)
+    except KeyError as e:
+        print(f"error: heading not found — {e}", file=sys.stderr)
+        sys.exit(1)
+    except FileNotFoundError as e:
+        print(f"error: {e}", file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"error: {e}", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

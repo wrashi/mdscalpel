@@ -95,6 +95,25 @@ def test_frontmatter_read(md_file):
     assert fm["project"] == "test"
 
 
+def test_heading_inside_code_fence_ignored(tmp_path):
+    f = tmp_path / "fenced.md"
+    f.write_text("## Real\n\nContent.\n\n```python\n# not a heading\n## also not\n```\n\n## After\n\nAfter content.\n", encoding="utf-8")
+    doc = MdScalpel(f)
+    texts = [h["text"] for h in doc.headings()]
+    assert "not a heading" not in texts
+    assert "also not" not in texts
+    assert texts == ["Real", "After"]
+
+
+def test_write_is_atomic(tmp_path, monkeypatch):
+    f = tmp_path / "atomic.md"
+    f.write_text("## Alpha\n\nOld.\n\n## Beta\n\nBeta.\n", encoding="utf-8")
+    doc = MdScalpel(f)
+    doc.write("Alpha", "New.\n", confirm=False)
+    assert (tmp_path / "atomic.md.tmp").exists() is False  # tmp cleaned up
+    assert "New." in f.read_text()
+
+
 def test_write_confirm_false_does_not_read_stdin(md_file, monkeypatch):
     """confirm=False must not touch stdin — critical for piped CLI workflows."""
     stdin_read = []

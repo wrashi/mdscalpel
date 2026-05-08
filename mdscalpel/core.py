@@ -1,6 +1,7 @@
 import re
 import difflib
 import sys
+import tempfile
 from pathlib import Path
 
 
@@ -19,7 +20,13 @@ class MdScalpel:
 
     def _parse_headings(self) -> list[dict]:
         headings = []
+        in_fence = False
         for i, line in enumerate(self._lines):
+            if re.match(r"^(`{3,}|~{3,})", line):
+                in_fence = not in_fence
+                continue
+            if in_fence:
+                continue
             m = re.match(r"^(#+)\s+(.*)", line)
             if m:
                 headings.append({
@@ -59,6 +66,17 @@ class MdScalpel:
                 end = candidate["line"]
                 break
         return start, end
+
+    def _write_atomic(self, lines: list[str]) -> None:
+        """Write lines to file atomically via a temp file + rename."""
+        content = "".join(lines)
+        tmp = self.path.with_suffix(self.path.suffix + ".tmp")
+        try:
+            tmp.write_text(content, encoding="utf-8")
+            tmp.replace(self.path)
+        except Exception:
+            tmp.unlink(missing_ok=True)
+            raise
 
     def _confirm(self) -> bool:
         """Prompt for confirmation via /dev/tty so stdin can be a pipe."""
@@ -108,7 +126,7 @@ class MdScalpel:
                 print("Aborted.")
                 return False
 
-        self.path.write_text("".join(new_lines), encoding="utf-8")
+        self._write_atomic(new_lines)
         self._load()
         return True
 
@@ -157,6 +175,6 @@ class MdScalpel:
                 print("Aborted.")
                 return False
 
-        self.path.write_text("".join(new_lines), encoding="utf-8")
+        self._write_atomic(new_lines)
         self._load()
         return True
